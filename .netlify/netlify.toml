@@ -7,10 +7,9 @@ redirects = []
 [functions."*"]
 
 [build]
-publish = "C:\\Users\\AMIRA\\Desktop\\chess-registration-bot\\dist"
+publish = "C:\\Users\\AMIRA\\Desktop\\8-squared-registration-bot\\dist"
 publishOrigin = "ui"
 commandOrigin = "ui"
-base = "C:\\Users\\AMIRA\\Desktop\\chess-registration-bot"
 command = "npm run build"
 
 [build.environment]
