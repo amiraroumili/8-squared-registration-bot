@@ -1,3 +1,40 @@
+/* Responsive tweaks for very small screens */
+@media (max-width: 400px) {
+  html, body, #root {
+    font-size: 13px;
+  }
+  .logo {
+    height: 3em;
+    padding: 0.5em;
+  }
+  .card {
+    padding: 0.7em;
+  }
+  button, .register {
+    font-size: 1em;
+    padding: 0.5em 1.2em;
+    border-radius: 1.2em;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 320px) {
+  html, body, #root {
+    font-size: 11px;
+  }
+  .logo {
+    height: 2em;
+    padding: 0.2em;
+  }
+  .card {
+    padding: 0.3em;
+  }
+  button, .register {
+    font-size: 0.9em;
+    padding: 0.3em 0.7em;
+    min-width: 80px;
+  }
+}
 /* Global reset and full-bleed background so there are no white edges on mobile */
 html, body {
   width: 100%;
