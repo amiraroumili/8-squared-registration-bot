@@ -9,7 +9,6 @@ html, body {
   background: #000 !important; /* force full-bleed background color (black) */
   box-sizing: border-box;
   color: #fff;
-  overflow-x: hidden;
   position: relative;
 }
 
