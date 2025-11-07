@@ -31,7 +31,7 @@ export const questions = [
   },
   {
     id: 'phone_number',
-    question: 'What is your phone number?',
+    question: 'What is your phone number? (for the telegram group invitation)',
     type: 'text',
     placeholder: 'e.g., +213 555 123 456',
     required: false,
