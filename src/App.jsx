@@ -9,7 +9,7 @@ const ChessRegistrationBot = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [messages, setMessages] = useState([
     { type: 'bot', text: "Welcome to the 8-Squared Club! I'm here to help you register. Let's get started!" },
-    { type: 'bot', text: "What is your First Name?" }
+    { type: 'bot', text: "What is your first name?" }
   ]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [userResponses, setUserResponses] = useState({});
@@ -46,7 +46,10 @@ const ChessRegistrationBot = () => {
       'Motivation': formattedData.motivation || '',
       'Chess Level': formattedData.chess_level || '',
       'Chess.com Username': formattedData.chess_username || '',
-      'ELO Rating': formattedData.elo_rating || '',
+      'Online ELO': formattedData.online_elo || '',
+      'FIDE Rating': formattedData.fide_rating || '',
+      'Official Tournaments': formattedData.official_tournaments || '',
+      'Tournament Names': formattedData.tournament_names || '',
       'Favorite Piece': formattedData.favorite_piece || '',
       'Availability': formattedData.availability || '',
       'Feedback': formattedData.feedback || ''
@@ -86,7 +89,10 @@ const ChessRegistrationBot = () => {
       formData.append('motivation', newEntry['Motivation']);
       formData.append('chessLevel', newEntry['Chess Level']);
       formData.append('chessUsername', newEntry['Chess.com Username']);
-      formData.append('eloRating', newEntry['ELO Rating']);
+      formData.append('onlineElo', newEntry['Online ELO']);
+      formData.append('fideRating', newEntry['FIDE Rating']);
+      formData.append('officialTournaments', newEntry['Official Tournaments']);
+      formData.append('tournamentNames', newEntry['Tournament Names']);
       formData.append('favoritePiece', newEntry['Favorite Piece']);
       formData.append('availability', newEntry['Availability']);
       formData.append('feedback', newEntry['Feedback']);
@@ -322,6 +328,7 @@ const ChessRegistrationBot = () => {
           @media (max-width: 768px) {
             .welcome-content {
               text-align: center !important;
+              margin-top: -130px !important;
             }
             .welcome-logo, .welcome-divider, .welcome-text {
               margin-left: auto !important;

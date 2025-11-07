@@ -2,7 +2,7 @@ export const questions = [
   // 🧍 Personal Information
   {
     id: 'first_name',
-    question: 'What is your First Name?',
+    question: 'What is your first name?',
     type: 'text',
     placeholder: 'Type your first name here...',
     required: true,
@@ -10,7 +10,7 @@ export const questions = [
   },
   {
     id: 'last_name',
-    question: 'What is your Last Name?',
+    question: 'What is your last name?',
     type: 'text',
     placeholder: 'Type your last name here...',
     required: true,
@@ -18,7 +18,7 @@ export const questions = [
   },
   {
     id: 'email',
-    question: 'What is your Email Address?',
+    question: 'What is your email address?',
     type: 'text',
     placeholder: 'example@email.com',
     required: true,
@@ -31,7 +31,7 @@ export const questions = [
   },
   {
     id: 'phone_number',
-    question: 'What is your Phone Number?',
+    question: 'What is your phone number?',
     type: 'text',
     placeholder: 'e.g., +213 555 123 456',
     required: false,
@@ -47,7 +47,7 @@ export const questions = [
   },
   {
     id: 'school',
-    question: 'Which School or Institution do you attend?',
+    question: 'Which school or institution do you attend?',
     type: 'mcq',
     options: ['NHSM', 'ENSIA', 'NHSCS', 'NHSAST', 'ENSNN', 'Other'],
     required: true
@@ -126,27 +126,51 @@ export const questions = [
   },
   {
     id: 'chess_username',
-    question: 'What is your Chess.com Username?',
+    question: 'What is your Chess.com username?',
     type: 'text',
     placeholder: 'Your Chess.com username...',
     required: false,
     skippable: true
   },
   {
-    id: 'elo_rating',
-    question: 'What is your ELO Rating?',
+    id: 'online_elo',
+    question: 'Share your online ELO ratings (Chess.com, Lichess, etc.)',
     type: 'text',
-    placeholder: 'e.g., 1200, 1500, 1800...',
+    placeholder: 'e.g., Chess.com: 1500, Lichess: 1600...',
+    required: false,
+    skippable: true
+  },
+  {
+    id: 'fide_rating',
+    question: 'Share your FIDE rating (if applicable)',
+    type: 'text',
+    placeholder: 'e.g., 1800, or leave blank if not rated...',
     required: false,
     skippable: true,
     validation: (value) => {
       if (!value || value.trim() === '') return null; // Allow empty for optional
-      const eloValue = parseInt(value.trim());
-      if (isNaN(eloValue) || eloValue < 0 || eloValue > 3500) {
-        return 'Please enter a valid ELO rating (0-3500)';
+      const fideValue = parseInt(value.trim());
+      if (isNaN(fideValue) || fideValue < 0 || fideValue > 3500) {
+        return 'Please enter a valid FIDE rating (0-3500)';
       }
       return null;
     }
+  },
+  {
+    id: 'official_tournaments',
+    question: 'Have you ever participated in official tournaments?',
+    type: 'mcq',
+    options: ['Yes', 'No'],
+    required: true
+  },
+  {
+    id: 'tournament_names',
+    question: 'Please mention which tournaments you participated in',
+    type: 'text',
+    placeholder: 'e.g., National Chess Championship 2024, Regional Tournaments...',
+    required: true,
+    conditionalOn: { field: 'official_tournaments', value: 'Yes' },
+    validation: (value) => value.trim().length > 0 ? null : 'Please mention the tournaments you participated in'
   },
 
   // ♟️ Chess Personality
