@@ -16,12 +16,40 @@ const ChessRegistrationBot = () => {
   const [inputValue, setInputValue] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [validationError, setValidationError] = useState('');
+
 
   const saveToFile = async (data) => {
     const timestamp = new Date().toISOString();
+    
+    // Format the data for Google Sheets (convert arrays to strings)
+    const formattedData = {};
+    Object.keys(data).forEach(key => {
+      if (Array.isArray(data[key])) {
+        formattedData[key] = data[key].join(', ');
+      } else {
+        formattedData[key] = data[key] || '';
+      }
+    });
+    
     const newEntry = {
       Timestamp: timestamp,
-      ...data
+      'First Name': formattedData.first_name || '',
+      'Last Name': formattedData.last_name || '',
+      'Email': formattedData.email || '',
+      'Phone Number': formattedData.phone_number || '',
+      'School': formattedData.school || '',
+      'School (Other)': formattedData.school_other || '',
+      'Skills': formattedData.skills || '',
+      'Skills (Other)': formattedData.skills_other || '',
+      'Help Interest': formattedData.help_interest || '',
+      'Motivation': formattedData.motivation || '',
+      'Chess Level': formattedData.chess_level || '',
+      'Chess.com Username': formattedData.chess_username || '',
+      'ELO Rating': formattedData.elo_rating || '',
+      'Favorite Piece': formattedData.favorite_piece || '',
+      'Availability': formattedData.availability || '',
+      'Feedback': formattedData.feedback || ''
     };
 
     // Save to localStorage as backup
@@ -41,15 +69,36 @@ const ChessRegistrationBot = () => {
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWURyN1hJeUS-s4axDrNuqu_gnnw1u-KSA4vgQdrmgtYBV258It8LlRbNNgCaa4B4H/exec';
     
     try {
+      console.log('Sending data to Google Sheets:', newEntry);
+      
+      // Create form data with individual fields
+      const formData = new FormData();
+      formData.append('timestamp', newEntry.Timestamp);
+      formData.append('firstName', newEntry['First Name']);
+      formData.append('lastName', newEntry['Last Name']);
+      formData.append('email', newEntry['Email']);
+      formData.append('phoneNumber', newEntry['Phone Number']);
+      formData.append('school', newEntry['School']);
+      formData.append('schoolOther', newEntry['School (Other)']);
+      formData.append('skills', newEntry['Skills']);
+      formData.append('skillsOther', newEntry['Skills (Other)']);
+      formData.append('helpInterest', newEntry['Help Interest']);
+      formData.append('motivation', newEntry['Motivation']);
+      formData.append('chessLevel', newEntry['Chess Level']);
+      formData.append('chessUsername', newEntry['Chess.com Username']);
+      formData.append('eloRating', newEntry['ELO Rating']);
+      formData.append('favoritePiece', newEntry['Favorite Piece']);
+      formData.append('availability', newEntry['Availability']);
+      formData.append('feedback', newEntry['Feedback']);
+      
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newEntry)
+        body: formData
       });
-      console.log('Data sent to Google Sheets successfully');
+      
+      const result = await response.text();
+      console.log('Google Sheets response:', result);
+      console.log('Data sent successfully');
     } catch (error) {
       console.error('Error sending to Google Sheets:', error);
     }
@@ -76,26 +125,121 @@ const ChessRegistrationBot = () => {
     }, 800);
   };
 
+  const shouldSkipQuestion = (questionIndex, responses = userResponses) => {
+    const q = questions[questionIndex];
+    if (!q.conditionalOn) return false;
+    
+    const { field, value, valueIncludes } = q.conditionalOn;
+    const userValue = responses[field];
+    
+    if (valueIncludes) {
+      return !userValue || !userValue.includes(valueIncludes);
+    }
+    return userValue !== value;
+  };
+
+  const getNextQuestionIndex = (currentIndex, responses = userResponses) => {
+    let nextIndex = currentIndex + 1;
+    while (nextIndex < questions.length && shouldSkipQuestion(nextIndex, responses)) {
+      nextIndex++;
+    }
+    return nextIndex;
+  };
+
   const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() && questions[currentQuestion].required) {
+      setValidationError('This field is required');
+      return;
+    }
 
     const currentQ = questions[currentQuestion];
-    setMessages(prev => [...prev, { type: 'user', text: inputValue }]);
+    
+    // Validate input
+    if (currentQ.validation) {
+      const error = currentQ.validation(inputValue);
+      if (error) {
+        setValidationError(error);
+        return;
+      }
+    }
+
+    setValidationError('');
+    setMessages(prev => [...prev, { type: 'user', text: inputValue || 'Skipped' }]);
     
     const newResponses = { ...userResponses, [currentQ.id]: inputValue };
     setUserResponses(newResponses);
     setInputValue('');
 
     setTimeout(() => {
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-        addBotMessage(questions[currentQuestion + 1].question);
+      const nextIndex = getNextQuestionIndex(currentQuestion, newResponses);
+      if (nextIndex < questions.length) {
+        setCurrentQuestion(nextIndex);
+        addBotMessage(questions[nextIndex].question);
       } else {
         setIsComplete(true);
         addBotMessage("🎉 Registration complete! Thank you for joining 8-Squared. Your data has been saved. We'll contact you soon!");
         saveToFile(newResponses);
       }
     }, 500);
+  };
+
+  const handleSkip = () => {
+    const currentQ = questions[currentQuestion];
+    if (!currentQ.skippable) return;
+
+    setValidationError('');
+    setMessages(prev => [...prev, { type: 'user', text: 'Skipped' }]);
+    
+    const newResponses = { ...userResponses, [currentQ.id]: '' };
+    setUserResponses(newResponses);
+    setInputValue('');
+
+    setTimeout(() => {
+      const nextIndex = getNextQuestionIndex(currentQuestion, newResponses);
+      if (nextIndex < questions.length) {
+        setCurrentQuestion(nextIndex);
+        addBotMessage(questions[nextIndex].question);
+      } else {
+        setIsComplete(true);
+        addBotMessage("🎉 Registration complete! Thank you for joining 8-Squared. Your data has been saved. We'll contact you soon!");
+        saveToFile(newResponses);
+      }
+    }, 500);
+  };
+
+  const handleBack = () => {
+    if (currentQuestion === 0) return; // Can't go back from first question
+
+    setValidationError('');
+    setInputValue('');
+
+    // Find the actual previous question that was shown (skip over conditional questions)
+    let prevIndex = currentQuestion - 1;
+    
+    // Keep going back until we find a question that wasn't skipped
+    while (prevIndex > 0 && shouldSkipQuestion(prevIndex, userResponses)) {
+      prevIndex--;
+    }
+    
+    // Remove messages: Remove current bot question and previous user answer
+    setMessages(prev => {
+      const filtered = [...prev];
+      // Always remove at least 2: current bot question + previous user answer
+      if (filtered.length >= 2) {
+        filtered.pop(); // Remove bot's current question
+        filtered.pop(); // Remove user's last answer
+      }
+      return filtered;
+    });
+
+    // Clear the response for the PREVIOUS question (the one we're going back to)
+    const prevQ = questions[prevIndex];
+    const updatedResponses = { ...userResponses };
+    delete updatedResponses[prevQ.id];
+    setUserResponses(updatedResponses);
+    
+    // Set to previous question
+    setCurrentQuestion(prevIndex);
   };
 
   const handleOptionClick = (option) => {
@@ -108,14 +252,16 @@ const ChessRegistrationBot = () => {
         : [...current, option];
       setUserResponses({ ...userResponses, [currentQ.id]: newSelection });
     } else {
+      setValidationError('');
       setMessages(prev => [...prev, { type: 'user', text: option }]);
       const newResponses = { ...userResponses, [currentQ.id]: option };
       setUserResponses(newResponses);
 
       setTimeout(() => {
-        if (currentQuestion < questions.length - 1) {
-          setCurrentQuestion(currentQuestion + 1);
-          addBotMessage(questions[currentQuestion + 1].question);
+        const nextIndex = getNextQuestionIndex(currentQuestion, newResponses);
+        if (nextIndex < questions.length) {
+          setCurrentQuestion(nextIndex);
+          addBotMessage(questions[nextIndex].question);
         } else {
           setIsComplete(true);
           addBotMessage("🎉 Registration complete! Thank you for joining 8-Squared. Your data has been saved. We'll contact you soon!");
@@ -129,14 +275,19 @@ const ChessRegistrationBot = () => {
     const currentQ = questions[currentQuestion];
     const selected = userResponses[currentQ.id] || [];
     
-    if (selected.length === 0) return;
+    if (selected.length === 0 && currentQ.required) {
+      setValidationError('Please select at least one option');
+      return;
+    }
 
+    setValidationError('');
     setMessages(prev => [...prev, { type: 'user', text: selected.join(', ') }]);
 
     setTimeout(() => {
-      if (currentQuestion < questions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-        addBotMessage(questions[currentQuestion + 1].question);
+      const nextIndex = getNextQuestionIndex(currentQuestion, userResponses);
+      if (nextIndex < questions.length) {
+        setCurrentQuestion(nextIndex);
+        addBotMessage(questions[nextIndex].question);
       } else {
         setIsComplete(true);
         addBotMessage("🎉 Registration complete! Thank you for joining 8-Squared. Your data has been saved. We'll contact you soon!");
@@ -154,9 +305,10 @@ const ChessRegistrationBot = () => {
         minHeight: '100vh',
         background: '#000000',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
+        padding: '20px 20px 60px 20px',
         fontFamily: '"Segoe UI", "Roboto", sans-serif',
         position: 'relative',
         overflow: 'hidden'
@@ -357,6 +509,22 @@ const ChessRegistrationBot = () => {
             </div>
           </div>
         </div>
+
+        {/* Copyright Footer */}
+        <div style={{
+          position: 'fixed',
+          bottom: '0',
+          left: '0',
+          right: '0',
+          fontSize: '12px',
+          color: '#666',
+          textAlign: 'center',
+          padding: '15px 20px',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 10
+        }}>
+          © 2025 8-Squared Chess Club | Developed by Amira Roumili (HR Department)
+        </div>
       </div>
     );
   }
@@ -505,89 +673,218 @@ const ChessRegistrationBot = () => {
           margin: '0 auto'
         }}>
           <div style={{ padding: '20px 20px 10px 20px' }}>
-          {currentQ.type === 'text' && (
-            <div style={{ 
-              display: 'flex', 
-              gap: '12px',
-              alignItems: 'center',
-              backgroundColor: '#0a0a0a',
-              padding: '8px 8px 8px 20px',
-              borderRadius: '25px',
-              border: '1px solid #333'
+          {/* Validation Error Message */}
+          {validationError && (
+            <div style={{
+              padding: '12px 20px',
+              backgroundColor: '#ff4444',
+              color: '#fff',
+              borderRadius: '10px',
+              marginBottom: '15px',
+              fontSize: '14px',
+              fontWeight: '500',
+              textAlign: 'center'
             }}>
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder={currentQ.placeholder}
-                style={{
-                  flex: '1',
-                  padding: '14px 0',
-                  backgroundColor: 'transparent',
-                  color: '#C9A961',
-                  border: 'none',
-                  outline: 'none',
-                  fontSize: 'clamp(14px, 2.5vw, 16px)',
-                  fontWeight: '400',
-                  letterSpacing: '0.3px'
-                }}
-              />
-              <button
-                onClick={handleSendMessage}
-                style={{
-                  padding: '12px',
-                  backgroundColor: 'transparent',
-                  color: '#C9A961',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  borderRadius: '50%'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#1a1a1a';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                }}
-              >
-                <Send size={20} />
-              </button>
+              ⚠️ {validationError}
             </div>
           )}
-
-          {currentQ.type === 'mcq' && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
-              {currentQ.options.map((option, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleOptionClick(option)}
+          
+          {currentQ.type === 'text' && (
+            <>
+              <div style={{ 
+                display: 'flex', 
+                gap: '12px',
+                alignItems: 'center',
+                backgroundColor: '#0a0a0a',
+                padding: '8px 8px 8px 20px',
+                borderRadius: '25px',
+                border: '1px solid #333'
+              }}>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                    setValidationError('');
+                  }}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder={currentQ.placeholder}
                   style={{
-                    padding: '12px 28px',
+                    flex: '1',
+                    padding: '14px 0',
                     backgroundColor: 'transparent',
                     color: '#C9A961',
-                    border: '1px solid #C9A961',
-                    borderRadius: '25px',
-                    fontWeight: '400',
+                    border: 'none',
+                    outline: 'none',
                     fontSize: 'clamp(14px, 2.5vw, 16px)',
+                    fontWeight: '400',
+                    letterSpacing: '0.3px'
+                  }}
+                />
+                <button
+                  onClick={handleSendMessage}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: 'transparent',
+                    color: '#C9A961',
+                    border: 'none',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    letterSpacing: '0.5px'
+                    display: 'flex',
+                    alignItems: 'center',
+                    borderRadius: '50%'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#C9A961';
-                    e.target.style.color = '#000000';
+                    e.target.style.backgroundColor = '#1a1a1a';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'transparent';
-                    e.target.style.color = '#C9A961';
                   }}
                 >
-                  {option}
+                  <Send size={20} />
                 </button>
-              ))}
+              </div>
+              
+              {/* Back and Skip buttons row */}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                {/* Back Button */}
+                {currentQuestion > 0 && (
+                  <button
+                    onClick={handleBack}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: 'transparent',
+                      color: '#888',
+                      border: '1px solid #333',
+                      borderRadius: '20px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '400',
+                      flex: '1',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#1a1a1a';
+                      e.target.style.color = '#C9A961';
+                      e.target.style.borderColor = '#C9A961';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.color = '#888';
+                      e.target.style.borderColor = '#333';
+                    }}
+                  >
+                    ← Back
+                  </button>
+                )}
+
+                {/* Skip Button */}
+                {currentQ.skippable && (
+                  <button
+                    onClick={handleSkip}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: 'transparent',
+                      color: '#888',
+                      border: '1px solid #333',
+                      borderRadius: '20px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '400',
+                      flex: '1',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#1a1a1a';
+                      e.target.style.color = '#aaa';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.color = '#888';
+                    }}
+                  >
+                    Skip →
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+
+          {currentQ.type === 'mcq' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+                {currentQ.options.map((option, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleOptionClick(option)}
+                    style={{
+                      padding: '12px 28px',
+                      backgroundColor: 'transparent',
+                      color: '#C9A961',
+                      border: '1px solid #C9A961',
+                      borderRadius: '25px',
+                      fontWeight: '400',
+                      fontSize: 'clamp(14px, 2.5vw, 16px)',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '0.5px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#C9A961';
+                      e.target.style.color = '#000000';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.color = '#C9A961';
+                    }}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Back button for MCQ */}
+              {currentQuestion > 0 && (
+                <button
+                  onClick={handleBack}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'transparent',
+                    color: '#888',
+                    border: '1px solid #333',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '400',
+                    transition: 'all 0.3s ease',
+                    marginTop: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#1a1a1a';
+                    e.target.style.color = '#C9A961';
+                    e.target.style.borderColor = '#C9A961';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = '#888';
+                    e.target.style.borderColor = '#333';
+                  }}
+                >
+                  ← Back
+                </button>
+              )}
             </div>
           )}
 
@@ -599,7 +896,10 @@ const ChessRegistrationBot = () => {
                   return (
                     <button
                       key={idx}
-                      onClick={() => handleOptionClick(option)}
+                      onClick={() => {
+                        handleOptionClick(option);
+                        setValidationError('');
+                      }}
                       style={{
                         padding: '12px 28px',
                         backgroundColor: selected ? '#C9A961' : 'transparent',
@@ -618,27 +918,64 @@ const ChessRegistrationBot = () => {
                   );
                 })}
               </div>
-              <button
-                onClick={handleMultipleChoiceSubmit}
-                disabled={(userResponses[currentQ.id] || []).length === 0}
-                style={{
-                  marginTop: '16px',
-                  padding: '14px 32px',
-                  backgroundColor: '#C9A961',
-                  color: '#000000',
-                  fontWeight: '500',
-                  fontSize: 'clamp(15px, 2.5vw, 17px)',
-                  borderRadius: '25px',
-                  border: 'none',
-                  cursor: (userResponses[currentQ.id] || []).length === 0 ? 'not-allowed' : 'pointer',
-                  opacity: (userResponses[currentQ.id] || []).length === 0 ? 0.5 : 1,
-                  transition: 'all 0.3s ease',
-                  letterSpacing: '0.5px',
-                  alignSelf: 'center'
-                }}
-              >
-                Submit Selection
-              </button>
+              
+              {/* Submit and Back buttons row */}
+              <div style={{ display: 'flex', gap: '12px', marginTop: '8px', alignItems: 'center', justifyContent: 'center' }}>
+                {/* Back Button */}
+                {currentQuestion > 0 && (
+                  <button
+                    onClick={handleBack}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: 'transparent',
+                      color: '#888',
+                      border: '1px solid #333',
+                      borderRadius: '20px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '400',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#1a1a1a';
+                      e.target.style.color = '#C9A961';
+                      e.target.style.borderColor = '#C9A961';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.color = '#888';
+                      e.target.style.borderColor = '#333';
+                    }}
+                  >
+                    ← Back
+                  </button>
+                )}
+                
+                {/* Submit Button */}
+                <button
+                  onClick={handleMultipleChoiceSubmit}
+                  disabled={(userResponses[currentQ.id] || []).length === 0}
+                  style={{
+                    padding: '14px 32px',
+                    backgroundColor: '#C9A961',
+                    color: '#000000',
+                    fontWeight: '500',
+                    fontSize: 'clamp(15px, 2.5vw, 17px)',
+                    borderRadius: '25px',
+                    border: 'none',
+                    cursor: (userResponses[currentQ.id] || []).length === 0 ? 'not-allowed' : 'pointer',
+                    opacity: (userResponses[currentQ.id] || []).length === 0 ? 0.5 : 1,
+                    transition: 'all 0.3s ease',
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  Submit Selection
+                </button>
+              </div>
             </div>
           )}
           </div>
@@ -682,6 +1019,15 @@ const ChessRegistrationBot = () => {
             marginBottom: '20px'
           }}>
             Thank you for registering! We'll be in touch soon.
+          </div>
+          <div style={{
+            fontSize: '14px',
+            color: '#666',
+            marginTop: '40px',
+            paddingTop: '20px',
+            borderTop: '1px solid #2a2a2a'
+          }}>
+            © 2025 8-Squared Chess Club | Developed by Amira Roumili (HR Department)
           </div>
         </div>
       )}

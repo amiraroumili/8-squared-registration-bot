@@ -13,16 +13,25 @@
 1. **Go to Google Sheets**: https://sheets.google.com
 2. Click **+ Blank** to create a new sheet
 3. Name it: `8-Squared Registrations`
-4. **Add these headers in Row 1** (A1 to H1):
+4. **Add these headers in Row 1** (A1 to Q1):
    ```
    A1: Timestamp
    B1: First Name
    C1: Last Name
    D1: Email
-   E1: Experience
-   F1: Age Group
-   G1: Availability
-   H1: Interests
+   E1: Phone Number
+   F1: School
+   G1: School (Other)
+   H1: Skills
+   I1: Skills (Other)
+   J1: Help Interest
+   K1: Motivation
+   L1: Chess Level
+   M1: Chess.com Username
+   N1: ELO Rating
+   O1: Favorite Piece
+   P1: Availability
+   Q1: Feedback
    ```
 5. Keep this tab open
 
@@ -43,16 +52,25 @@ function doPost(e) {
     // Parse the data
     var data = JSON.parse(e.postData.contents);
     
-    // Create the row
+    // Create the row with all fields
     var row = [
       data.Timestamp || new Date().toISOString(),
-      data.first_name || '',
-      data.last_name || '',
-      data.email || '',
-      data.experience || '',
-      data.age_group || '',
-      Array.isArray(data.availability) ? data.availability.join(', ') : data.availability || '',
-      data.interests || ''
+      data['First Name'] || '',
+      data['Last Name'] || '',
+      data.Email || '',
+      data['Phone Number'] || '',
+      data.School || '',
+      data['School (Other)'] || '',
+      data.Skills || '',
+      data['Skills (Other)'] || '',
+      data['Help Interest'] || '',
+      data.Motivation || '',
+      data['Chess Level'] || '',
+      data['Chess.com Username'] || '',
+      data['ELO Rating'] || '',
+      data['Favorite Piece'] || '',
+      data.Availability || '',
+      data.Feedback || ''
     ];
     
     // Add the row to the sheet
