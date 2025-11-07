@@ -582,13 +582,15 @@ const ChessRegistrationBot = () => {
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '100px 20px 20px 20px',
+          overflowX: 'hidden',
+          padding: '100px 15px 20px 15px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
           maxWidth: '900px',
           width: '100%',
-          margin: '0 auto'
+          margin: '0 auto',
+          boxSizing: 'border-box'
         }}
       >
         {/* Bot Name Label at the start of conversation */}
@@ -624,7 +626,9 @@ const ChessRegistrationBot = () => {
               fontWeight: '400',
               fontSize: 'clamp(14px, 2.5vw, 16px)',
               lineHeight: '1.6',
-              letterSpacing: '0.3px'
+              letterSpacing: '0.3px',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word'
             }}>
               {msg.text}
             </div>
