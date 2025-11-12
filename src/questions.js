@@ -114,7 +114,7 @@ Ready to choose? Click continue!`,
     type: 'mcq',
     options: ['HR Department', 'ER Department', 'Event Department', 'Design & Multimedia Department'],
     required: true,
-    conditionalOn: { field: 'department_choice', value: ['Chess Department + another department (you\'ll choose priority next)', 'Two departments only (not Chess Department)'] }
+    conditionalOn: { field: 'department_choice', value: ['Chess Department + another department (you\'ll choose priority next)', 'One department only (not Chess Department)'] }
   },
   {
     id: 'secondary_department',
@@ -122,7 +122,7 @@ Ready to choose? Click continue!`,
     type: 'mcq',
     options: ['HR Department', 'ER Department', 'Event Department', 'Design & Multimedia Department'],
     required: true,
-    conditionalOn: { field: 'department_choice', value: ['Chess Department + another department (you\'ll choose priority next)', 'Two departments only (not Chess Department)'] }
+    conditionalOn: { field: 'department_choice', value: ['Chess Department + another department (you\'ll choose priority next)', 'One department only (not Chess Department)'] }
   },
 
   // 🎯 Motivation & Experience
