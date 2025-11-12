@@ -853,31 +853,38 @@ const ChessRegistrationBot = () => {
           {currentQ.type === 'mcq' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
-                {currentQ.options.map((option, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleOptionClick(option)}
-                    style={{
-                      padding: '12px 28px',
-                      backgroundColor: 'transparent',
-                      color: '#C9A961',
-                      border: '1px solid #C9A961',
-                      borderRadius: '25px',
-                      fontWeight: '400',
-                      fontSize: 'clamp(14px, 2.5vw, 16px)',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      letterSpacing: '0.5px',
-                      transform: 'translateY(0)',
-                      boxShadow: '0 2px 8px rgba(201, 169, 97, 0.2)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#C9A961';
-                      e.target.style.color = '#000000';
-                      e.target.style.transform = 'translateY(-3px)';
-                      e.target.style.boxShadow = '0 6px 16px rgba(201, 169, 97, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
+                {(() => {
+                  // Filter out primary department from secondary department options
+                  let filteredOptions = currentQ.options;
+                  if (currentQ.id === 'secondary_department' && userResponses.primary_department) {
+                    filteredOptions = currentQ.options.filter(option => option !== userResponses.primary_department);
+                  }
+                  
+                  return filteredOptions.map((option, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleOptionClick(option)}
+                      style={{
+                        padding: '12px 28px',
+                        backgroundColor: 'transparent',
+                        color: '#C9A961',
+                        border: '1px solid #C9A961',
+                        borderRadius: '25px',
+                        fontWeight: '400',
+                        fontSize: 'clamp(14px, 2.5vw, 16px)',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        letterSpacing: '0.5px',
+                        transform: 'translateY(0)',
+                        boxShadow: '0 2px 8px rgba(201, 169, 97, 0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = '#C9A961';
+                        e.target.style.color = '#000000';
+                        e.target.style.transform = 'translateY(-3px)';
+                        e.target.style.boxShadow = '0 6px 16px rgba(201, 169, 97, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
                       e.target.style.backgroundColor = 'transparent';
                       e.target.style.color = '#C9A961';
                       e.target.style.transform = 'translateY(0)';
@@ -886,7 +893,8 @@ const ChessRegistrationBot = () => {
                   >
                     {option}
                   </button>
-                ))}
+                  ));
+                })()}
               </div>
               
               {/* Back button for MCQ */}
