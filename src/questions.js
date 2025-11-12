@@ -62,43 +62,67 @@ export const questions = [
     validation: (value) => value.trim().length > 0 ? null : 'Please specify your school'
   },
 
-  // 💡 Skills & Interests
+  // 🏢 Department Selection
   {
-    id: 'skills',
-    question: 'Which of these skills do you have or would like to develop? (Select all that apply)',
-    type: 'multiple_choice',
-    options: [
-      'Video Editing',
-      'Photography',
-      'Communication / Public Speaking',
-      'Graphic Design',
-      'Event Management',
-      'Coaching or Teaching',
-      'Social Media Management',
-      'Other'
-    ],
+    id: 'view_departments',
+    question: 'Would you like to see the description of each department before choosing?',
+    type: 'mcq',
+    options: ['Yes, show me the descriptions', 'No, I already know'],
     required: true
   },
+{
+  id: 'department_info',
+  question: `📋 Department Descriptions:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 External Relations (ER)
+Oversees club operations, partnerships, and communication between departments.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤝 Human Resources (HR)
+Handles registrations, onboarding, and ensures a positive, organized club environment.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 Design & Multimedia
+Creates visuals, posters, and media content that represent the club's identity.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎉 Event Coordination
+Plans and manages tournaments, workshops, and all club events.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+♟️ Chess Department
+Focuses on training, strategy, and representing the club in competitions.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ready to choose? Click continue!`,
+  type: 'mcq',
+  options: ['Continue to department selection'],
+  required: true,
+  conditionalOn: { field: 'view_departments', value: 'Yes, show me the descriptions' }
+},
+
   {
-    id: 'skills_other',
-    question: 'Please specify other skills',
-    type: 'text',
-    placeholder: 'Type your other skills here...',
-    required: true,
-    conditionalOn: { field: 'skills', valueIncludes: 'Other' },
-    validation: (value) => value.trim().length > 0 ? null : 'Please specify your other skills'
-  },
-  {
-    id: 'help_interest',
-    question: 'Would you be interested in helping with tournaments or teaching beginners?',
+    id: 'department_choice',
+    question: 'Which department(s) would you like to join?',
     type: 'mcq',
     options: [
-      'Yes, I\'d love to help organize tournaments',
-      'Yes, I\'d love to teach or mentor beginners',
-      'Maybe later',
-      'Not right now'
+      'Chess Department only',
+      'Chess Department + another department (you\'ll choose priority next)',
+      'One department only (not Chess Department)'
     ],
     required: true
+  },
+  {
+    id: 'primary_department',
+    question: 'Select your PRIMARY department (First Priority):',
+    type: 'mcq',
+    options: ['HR Department', 'ER Department', 'Event Department', 'Design & Multimedia Department'],
+    required: true,
+    conditionalOn: { field: 'department_choice', value: ['Chess Department + another department (you\'ll choose priority next)', 'Two departments only (not Chess Department)'] }
+  },
+  {
+    id: 'secondary_department',
+    question: 'Select your SECONDARY department (Second Priority):',
+    type: 'mcq',
+    options: ['HR Department', 'ER Department', 'Event Department', 'Design & Multimedia Department'],
+    required: true,
+    conditionalOn: { field: 'department_choice', value: ['Chess Department + another department (you\'ll choose priority next)', 'Two departments only (not Chess Department)'] }
   },
 
   // 🎯 Motivation & Experience

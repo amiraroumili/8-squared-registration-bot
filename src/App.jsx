@@ -40,9 +40,9 @@ const ChessRegistrationBot = () => {
       'Phone Number': formattedData.phone_number || '',
       'School': formattedData.school || '',
       'School (Other)': formattedData.school_other || '',
-      'Skills': formattedData.skills || '',
-      'Skills (Other)': formattedData.skills_other || '',
-      'Help Interest': formattedData.help_interest || '',
+      'Department Choice': formattedData.department_choice || '',
+      'Primary Department': formattedData.primary_department || '',
+      'Secondary Department': formattedData.secondary_department || '',
       'Motivation': formattedData.motivation || '',
       'Chess Level': formattedData.chess_level || '',
       'Chess.com Username': formattedData.chess_username || '',
@@ -72,30 +72,29 @@ const ChessRegistrationBot = () => {
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWURyN1hJeUS-s4axDrNuqu_gnnw1u-KSA4vgQdrmgtYBV258It8LlRbNNgCaa4B4H/exec';
     
     try {
-      console.log('Sending data to Google Sheets:', newEntry);
+      console.log('Sending data to Google Sheets:', formattedData);
       
       // Create form data with individual fields
       const formData = new FormData();
-      formData.append('timestamp', newEntry.Timestamp);
-      formData.append('firstName', newEntry['First Name']);
-      formData.append('lastName', newEntry['Last Name']);
-      formData.append('email', newEntry['Email']);
-      formData.append('phoneNumber', newEntry['Phone Number']);
-      formData.append('school', newEntry['School']);
-      formData.append('schoolOther', newEntry['School (Other)']);
-      formData.append('skills', newEntry['Skills']);
-      formData.append('skillsOther', newEntry['Skills (Other)']);
-      formData.append('helpInterest', newEntry['Help Interest']);
-      formData.append('motivation', newEntry['Motivation']);
-      formData.append('chessLevel', newEntry['Chess Level']);
-      formData.append('chessUsername', newEntry['Chess.com Username']);
-      formData.append('onlineElo', newEntry['Online ELO']);
-      formData.append('fideRating', newEntry['FIDE Rating']);
-      formData.append('officialTournaments', newEntry['Official Tournaments']);
-      formData.append('tournamentNames', newEntry['Tournament Names']);
-      formData.append('favoritePiece', newEntry['Favorite Piece']);
-      formData.append('availability', newEntry['Availability']);
-      formData.append('feedback', newEntry['Feedback']);
+      formData.append('first_name', formattedData.first_name || '');
+      formData.append('last_name', formattedData.last_name || '');
+      formData.append('email', formattedData.email || '');
+      formData.append('phone_number', formattedData.phone_number || '');
+      formData.append('school', formattedData.school || '');
+      formData.append('school_other', formattedData.school_other || '');
+      formData.append('department_choice', formattedData.department_choice || '');
+      formData.append('primary_department', formattedData.primary_department || '');
+      formData.append('secondary_department', formattedData.secondary_department || '');
+      formData.append('motivation', formattedData.motivation || '');
+      formData.append('chess_level', formattedData.chess_level || '');
+      formData.append('chess_username', formattedData.chess_username || '');
+      formData.append('online_elo', formattedData.online_elo || '');
+      formData.append('fide_rating', formattedData.fide_rating || '');
+      formData.append('official_tournaments', formattedData.official_tournaments || '');
+      formData.append('tournament_names', formattedData.tournament_names || '');
+      formData.append('favorite_piece', formattedData.favorite_piece || '');
+      formData.append('availability', formattedData.availability || '');
+      formData.append('feedback', formattedData.feedback || '');
       
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
@@ -141,6 +140,12 @@ const ChessRegistrationBot = () => {
     if (valueIncludes) {
       return !userValue || !userValue.includes(valueIncludes);
     }
+    
+    // Handle array of acceptable values
+    if (Array.isArray(value)) {
+      return !value.includes(userValue);
+    }
+    
     return userValue !== value;
   };
 
@@ -390,7 +395,8 @@ const ChessRegistrationBot = () => {
                 width: 'clamp(320px, 80%, 500px)',
                 height: 'auto',
                 marginBottom: '35px',
-                display: 'inline-block'
+                display: 'inline-block',
+                animation: 'fadeIn 1s ease-out, logoPulse 3s ease-in-out infinite'
               }}
             />
             
@@ -635,7 +641,8 @@ const ChessRegistrationBot = () => {
               lineHeight: '1.6',
               letterSpacing: '0.3px',
               wordBreak: 'break-word',
-              overflowWrap: 'break-word'
+              overflowWrap: 'break-word',
+              whiteSpace: 'pre-line'
             }}>
               {msg.text}
             </div>
@@ -694,7 +701,8 @@ const ChessRegistrationBot = () => {
               marginBottom: '15px',
               fontSize: '14px',
               fontWeight: '500',
-              textAlign: 'center'
+              textAlign: 'center',
+              animation: 'shake 0.5s ease-in-out'
             }}>
               ⚠️ {validationError}
             </div>
@@ -709,8 +717,18 @@ const ChessRegistrationBot = () => {
                 backgroundColor: '#0a0a0a',
                 padding: '8px 8px 8px 20px',
                 borderRadius: '25px',
-                border: '1px solid #333'
-              }}>
+                border: '1px solid #333',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#C9A961';
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(201, 169, 97, 0.5)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#333';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+              >
                 <input
                   type="text"
                   value={inputValue}
@@ -740,16 +758,19 @@ const ChessRegistrationBot = () => {
                     color: '#C9A961',
                     border: 'none',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.25s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    borderRadius: '50%'
+                    borderRadius: '50%',
+                    transform: 'scale(1)'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = '#1a1a1a';
+                    e.target.style.transform = 'scale(1.05)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.backgroundColor = 'transparent';
+                    e.target.style.transform = 'scale(1)';
                   }}
                 >
                   <Send size={20} />
@@ -846,15 +867,21 @@ const ChessRegistrationBot = () => {
                       fontSize: 'clamp(14px, 2.5vw, 16px)',
                       cursor: 'pointer',
                       transition: 'all 0.3s ease',
-                      letterSpacing: '0.5px'
+                      letterSpacing: '0.5px',
+                      transform: 'translateY(0)',
+                      boxShadow: '0 2px 8px rgba(201, 169, 97, 0.2)'
                     }}
                     onMouseEnter={(e) => {
                       e.target.style.backgroundColor = '#C9A961';
                       e.target.style.color = '#000000';
+                      e.target.style.transform = 'translateY(-3px)';
+                      e.target.style.boxShadow = '0 6px 16px rgba(201, 169, 97, 0.4)';
                     }}
                     onMouseLeave={(e) => {
                       e.target.style.backgroundColor = 'transparent';
                       e.target.style.color = '#C9A961';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 2px 8px rgba(201, 169, 97, 0.2)';
                     }}
                   >
                     {option}
