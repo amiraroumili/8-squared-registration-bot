@@ -419,7 +419,7 @@ const ChessRegistrationBot = () => {
                 fontWeight: '300',
                 maxWidth: '600px'
               }}>
-              Where every move reflects strategy, precision, and passion. Whether you're a beginner learning your first moves or a grandmaster sharpening your skills, our club has a place for you.
+              Where every move reflects strategy, precision, and passion. Whether you're a beginner learning your first moves or an advanced player sharpening your skills, our club has a place for you.
             </p>
 
             <p 
