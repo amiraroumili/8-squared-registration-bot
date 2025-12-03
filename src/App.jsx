@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Send, Users, CheckCircle, ChevronRight, Sparkles } from 'lucide-react';
+import { Send, Users, CheckCircle, ChevronRight, Sparkles, Lock } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import logo3d from './assets/logo3d.png';
 import logoNo from './assets/logo_no.png';
 import { questions } from './questions';
+
+// 🔒 REGISTRATION STATUS - Change this to open/close registration
+const REGISTRATION_OPEN = false; // Set to true to open registration, false to close
 
 const ChessRegistrationBot = () => {
   const [showWelcome, setShowWelcome] = useState(true);
@@ -308,6 +311,177 @@ const ChessRegistrationBot = () => {
   };
 
   const currentQ = questions[currentQuestion];
+
+  // Closed Registration Page
+  if (!REGISTRATION_OPEN) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#000000',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 20px',
+        fontFamily: '"Segoe UI", "Roboto", sans-serif',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Background glow effects */}
+        <div style={{
+          position: 'absolute',
+          top: '-150px',
+          left: '-150px',
+          width: '400px',
+          height: '400px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(201, 169, 97, 0.08), transparent 70%)',
+          pointerEvents: 'none'
+        }}></div>
+        
+        <div style={{
+          position: 'absolute',
+          bottom: '-100px',
+          right: '-100px',
+          width: '350px',
+          height: '350px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(201, 169, 97, 0.06), transparent 70%)',
+          pointerEvents: 'none'
+        }}></div>
+
+        {/* Main Content */}
+        <div style={{
+          maxWidth: '700px',
+          width: '100%',
+          textAlign: 'center',
+          position: 'relative',
+          zIndex: 1,
+          animation: 'fadeIn 0.8s ease-out'
+        }}>
+          {/* Logo */}
+          <img 
+            src={logoNo} 
+            alt="8-Squared Logo" 
+            style={{
+              width: 'clamp(280px, 70%, 450px)',
+              height: 'auto',
+              marginBottom: '50px',
+              animation: 'fadeIn 1s ease-out, logoPulse 3s ease-in-out infinite'
+            }}
+          />
+
+          {/* Lock Icon */}
+          <div style={{
+            marginBottom: '35px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(201, 169, 97, 0.1)',
+            border: '2px solid #C9A961'
+          }}>
+            <Lock size={40} color="#C9A961" />
+          </div>
+
+          {/* Heading */}
+          <h1 style={{
+            fontSize: 'clamp(28px, 5vw, 42px)',
+            fontWeight: '600',
+            color: '#C9A961',
+            marginBottom: '25px',
+            letterSpacing: '0.5px',
+            lineHeight: '1.3'
+          }}>
+            Registration Closed
+          </h1>
+
+          {/* Divider */}
+          <div style={{
+            width: '120px',
+            height: '3px',
+            background: 'linear-gradient(to right, transparent, #C9A961, transparent)',
+            margin: '0 auto 35px auto'
+          }}></div>
+
+          {/* Message */}
+          <p style={{
+            fontSize: 'clamp(16px, 2.2vw, 20px)',
+            color: '#B8A97A',
+            lineHeight: '1.8',
+            marginBottom: '25px',
+            fontWeight: '300',
+            maxWidth: '600px',
+            margin: '0 auto 25px auto'
+          }}>
+            Thank you for your interest in joining 8-Squared Chess Club!
+          </p>
+
+          <p style={{
+            fontSize: 'clamp(15px, 2vw, 18px)',
+            color: '#A89968',
+            lineHeight: '1.7',
+            marginBottom: '40px',
+            fontWeight: '300',
+            maxWidth: '550px',
+            margin: '0 auto 40px auto'
+          }}>
+            Registration for this session has been closed. Stay tuned for our next recruitment period by following our social media channels.
+          </p>
+
+          {/* Social Media / Contact Info */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '15px',
+            alignItems: 'center',
+            marginTop: '50px'
+          }}>
+            <p style={{
+              fontSize: 'clamp(14px, 1.8vw, 16px)',
+              color: '#888',
+              fontWeight: '300'
+            }}>
+              For inquiries, contact us:
+            </p>
+            <a 
+              href="mailto:contact@8squared.com" 
+              style={{
+                color: '#C9A961',
+                textDecoration: 'none',
+                fontSize: 'clamp(15px, 2vw, 17px)',
+                fontWeight: '400',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
+              onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
+            >
+              contact@8squared.com
+            </a>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          position: 'fixed',
+          bottom: '0',
+          left: '0',
+          right: '0',
+          padding: '20px',
+          textAlign: 'center',
+          fontSize: '13px',
+          color: '#666',
+          fontWeight: '300',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(10px)'
+        }}>
+          © 2025 8-Squared Chess Club | Developed by Amira Roumili (HR Department)
+        </div>
+      </div>
+    );
+  }
 
   // Welcome Page
   if (showWelcome) {
