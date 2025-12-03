@@ -366,22 +366,27 @@ const ChessRegistrationBot = () => {
             style={{
               width: 'clamp(280px, 70%, 450px)',
               height: 'auto',
-              marginBottom: '50px',
-              animation: 'fadeIn 1s ease-out, logoPulse 3s ease-in-out infinite'
+              marginBottom: '40px',
+              animation: 'fadeIn 1s ease-out, logoPulse 3s ease-in-out infinite',
+              display: 'block',
+              marginLeft: 'auto',
+              marginRight: 'auto'
             }}
           />
 
           {/* Lock Icon */}
           <div style={{
             marginBottom: '35px',
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             width: '80px',
             height: '80px',
             borderRadius: '50%',
             backgroundColor: 'rgba(201, 169, 97, 0.1)',
-            border: '2px solid #C9A961'
+            border: '2px solid #C9A961',
+            marginLeft: 'auto',
+            marginRight: 'auto'
           }}>
             <Lock size={40} color="#C9A961" />
           </div>
@@ -428,7 +433,7 @@ const ChessRegistrationBot = () => {
             maxWidth: '550px',
             margin: '0 auto 40px auto'
           }}>
-            Registration for this session has been closed. Stay tuned for our next recruitment period by following our social media channels.
+            Registration for this session has been closed. Stay tuned for our next registration period by following our social media channels.
           </p>
 
           {/* Social Media / Contact Info */}
@@ -447,7 +452,7 @@ const ChessRegistrationBot = () => {
               For inquiries, contact us:
             </p>
             <a 
-              href="mailto:contact@8squared.com" 
+              href="mailto:8-squared@nhdm.edu.dz" 
               style={{
                 color: '#C9A961',
                 textDecoration: 'none',
@@ -458,7 +463,7 @@ const ChessRegistrationBot = () => {
               onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
               onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
             >
-              contact@8squared.com
+              8-squared@nhdm.edu.dz
             </a>
           </div>
         </div>
