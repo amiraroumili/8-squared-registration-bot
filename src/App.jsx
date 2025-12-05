@@ -452,7 +452,7 @@ const ChessRegistrationBot = () => {
               For inquiries, contact us:
             </p>
             <a 
-              href="mailto:8-squared@nhdm.edu.dz" 
+              href="mailto:8-squared@nhsm.edu.dz" 
               style={{
                 color: '#C9A961',
                 textDecoration: 'none',
@@ -463,7 +463,7 @@ const ChessRegistrationBot = () => {
               onMouseEnter={(e) => e.target.style.textDecoration = 'underline'}
               onMouseLeave={(e) => e.target.style.textDecoration = 'none'}
             >
-              8-squared@nhdm.edu.dz
+              8-squared@nhsm.edu.dz
             </a>
           </div>
         </div>
